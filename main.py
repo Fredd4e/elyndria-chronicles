@@ -241,6 +241,7 @@ def toggle_character_panel():
 
 
 def input(key):
+    global camera_distance, free_camera
     if key == 'left mouse down': attack_sword()
     if key == 'q': cast_fireball()
     if key == 'c': toggle_character_panel()
@@ -249,7 +250,6 @@ def input(key):
         else: check_interact()
     if key == 'escape': application.quit()
     if key == 'f':
-        global free_camera
         free_camera = not free_camera
         if free_camera:
             camera.parent = scene
@@ -259,7 +259,7 @@ def input(key):
             camera.position = (0, 0, -camera_distance)
             print("[INFO] Free camera mode OFF")
 
-    global camera_distance
+    # Mouse wheel zoom
     if key == 'scroll up':
         camera_distance = max(min_distance, camera_distance - 2.5)
         camera.position = (0, 0, -camera_distance)
