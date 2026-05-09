@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Elyndria Chronicles - v2.2 (Player model scaled + lag debugging)
+Elyndria Chronicles - v2.3 (Stutter reduction + development mode off)
 """
 
 # Disable icon loading
@@ -13,6 +13,7 @@ import random
 import os
 
 app = Ursina()
+application.development_mode = False   # Major stutter reduction
 
 window.fullscreen = False
 window.size = (1280, 720)
@@ -21,7 +22,6 @@ window.borderless = False
 window.exit_button.visible = False
 mouse.locked = False
 
-# Clean up bad icon file
 if os.path.exists("textures/ursina.ico"):
     try: os.remove("textures/ursina.ico")
     except: pass
@@ -33,7 +33,7 @@ camera_distance = 11.0
 target_yaw = 0.0
 target_pitch = 18.0
 target_distance = 11.0
-SMOOTH_SPEED = 14.0
+SMOOTH_SPEED = 10.0
 camera_sensitivity = 280.0
 
 velocity = Vec3(0, 0, 0)
@@ -49,16 +49,10 @@ player_stats = type('PlayerStats', (), {'mana': 95})()
 current_dialogue = []
 dialogue_index = 0
 
-# ==================== PLAYER (real .obj - scaled down) ====================
+# PLAYER (scaled down)
 def create_detailed_player():
-    player = Entity(
-        model='assets/player.obj',
-        collider='box',
-        scale=0.25,          # 4x smaller than before
-        y=0.5
-    )
+    player = Entity(model='assets/player.obj', collider='box', scale=0.25, y=0.5)
     
-    # Sword and shield attached to the real model
     sword = Entity(parent=player, model='cube', color=color.rgb(0.72, 0.74, 0.80), scale=(0.07, 1.85, 0.11), position=(0.65, 1.35, 0.35), rotation=(22, 8, 4))
     Entity(parent=sword, model='cube', color=color.gold, scale=(0.38, 0.07, 0.18), position=(0, 0.58, 0))
     Entity(parent=sword, model='sphere', color=color.rgb(0.3, 0.7, 1), scale=0.09, position=(0, -0.85, 0))
@@ -212,7 +206,7 @@ def input(key):
         equipment_panel.enabled = False
         dialogue_box.enabled = False
 
-# UPDATE (with FPS counter for debugging lag)
+# UPDATE with FPS counter
 fps_text = Text("FPS: --", position=(-0.78, -0.45), scale=1.2, color=color.yellow, background=True)
 frame_count = 0
 last_time = 0
@@ -220,7 +214,6 @@ last_time = 0
 def update():
     global yaw, pitch, camera_distance, target_yaw, target_pitch, target_distance, camera_sensitivity, velocity, vy, on_ground, frame_count, last_time
     
-    # Simple FPS counter for debugging
     frame_count += 1
     current_time = time.time()
     if current_time - last_time >= 1.0:
@@ -271,9 +264,9 @@ def update():
     mana_text.text = f"Mana: {player_stats.mana}/100"
 
 print("=" * 60)
-print("ELY NDRIA CHRONICLES - v2.2 FINAL")
-print("Player model scaled to 0.25 (4x smaller)")
-print("FPS counter added for debugging lag")
+print("ELY NDRIA CHRONICLES - v2.3 FINAL")
+print("development_mode = False + lower lerp speed = less stutter")
+print("Player scale = 0.25 (4x smaller)")
 print("Press Esc for Options menu")
 print("Enjoy your quest, Aether Knight!")
 print("=" * 60)
