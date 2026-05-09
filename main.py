@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Elyndria Chronicles - v2.0 FINAL (All icon warnings removed - clean & smooth)
+Elyndria Chronicles - v2.1 FINAL (Aspect ratio spam + icon + emoji fixed)
 """
 
 # Disable icon loading completely (must be before importing ursina)
@@ -10,13 +10,24 @@ loadPrcFileData("", "icon-filename ")
 from ursina import *
 import math
 import random
+import os
 
 app = Ursina()
-window.title = "Elyndria Chronicles"
+
+# Fix rapid aspect ratio changes and fullscreen issues
+window.fullscreen = False
 window.size = (1280, 720)
+window.title = "Elyndria Chronicles"
 window.borderless = False
 window.exit_button.visible = False
 mouse.locked = False
+
+# Force delete any bad icon file
+if os.path.exists("textures/ursina.ico"):
+    try:
+        os.remove("textures/ursina.ico")
+    except:
+        pass
 
 # GLOBALS
 yaw = 0.0
@@ -151,9 +162,9 @@ dialogue_text = Text(parent=dialogue_box, text="", scale=1.1, color=color.white,
 equipment_panel = Entity(parent=camera.ui, model='quad', scale=(0.36, 0.58), color=color.rgba(0.06, 0.03, 0.10, 0.96), position=(0.62, 0.02), enabled=False)
 Text("EQUIPMENT", parent=equipment_panel, scale=2.0, color=color.gold, y=0.38, origin=(0, 0))
 Text("KAEL VOSS — AETHER KNIGHT", parent=equipment_panel, scale=1.1, color=color.white, y=0.30, origin=(0, 0))
-Text("⚔ Dawnbreaker Sword\n   +18 Attack | Aether Infused", parent=equipment_panel, scale=0.95, color=color.rgb(0.9, 0.85, 0.7), y=0.18, origin=(0, 0))
-Text("🛡 Eternal Ward Shield\n   +22 Defense | Void Resistant", parent=equipment_panel, scale=0.95, color=color.rgb(0.85, 0.75, 0.6), y=0.02, origin=(0, 0))
-Text("🪖 Aetherforged Plate\n   +15 Armor | Mana Regen", parent=equipment_panel, scale=0.95, color=color.rgb(0.7, 0.75, 0.85), y=-0.14, origin=(0, 0))
+Text("Sword: Dawnbreaker\n   +18 Attack | Aether Infused", parent=equipment_panel, scale=0.95, color=color.rgb(0.9, 0.85, 0.7), y=0.18, origin=(0, 0))
+Text("Shield: Eternal Ward\n   +22 Defense | Void Resistant", parent=equipment_panel, scale=0.95, color=color.rgb(0.85, 0.75, 0.6), y=0.02, origin=(0, 0))
+Text("Armor: Aetherforged Plate\n   +15 Armor | Mana Regen", parent=equipment_panel, scale=0.95, color=color.rgb(0.7, 0.75, 0.85), y=-0.14, origin=(0, 0))
 Text("STATS", parent=equipment_panel, scale=1.4, color=color.cyan, y=-0.26, origin=(0, 0))
 stats_text = Text("Level 7  •  Mana 95/100\nHealth 100/100  •  Strength 18", parent=equipment_panel, scale=0.95, color=color.white, y=-0.38, origin=(0, 0))
 
@@ -252,8 +263,8 @@ def update():
     mana_text.text = f"Mana: {player_stats.mana}/100"
 
 print("=" * 60)
-print("ELY NDRIA CHRONICLES - v2.0 FINAL")
-print("All icon warnings removed — game is now smooth!")
+print("ELY NDRIA CHRONICLES - v2.1 FINAL")
+print("Aspect ratio spam fixed + icon warnings removed")
 print("Press Esc for Options menu")
 print("Enjoy your quest, Aether Knight!")
 print("=" * 60)
