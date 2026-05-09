@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """
-Elyndria Chronicles - v1.7 FINAL (Icon warning spam fixed + all previous features)
+Elyndria Chronicles - v1.8 FINAL (Icon warning completely fixed)
 """
+
+# Must be BEFORE importing ursina
+from panda3d.core import loadPrcFileData
+loadPrcFileData("", "icon-filename ")
 
 from ursina import *
 import math
@@ -13,10 +17,6 @@ window.size = (1280, 720)
 window.borderless = False
 window.exit_button.visible = False
 mouse.locked = False
-
-# Silence the spammy ursina.ico warning that was flooding the console every frame and causing lag
-from panda3d.core import loadPrcFileData
-loadPrcFileData("", "icon-filename ")
 
 # GLOBALS
 yaw = 0.0
@@ -41,7 +41,7 @@ player_stats = type('PlayerStats', (), {'mana': 95})()
 current_dialogue = []
 dialogue_index = 0
 
-# PLAYER (detailed Kael Voss)
+# PLAYER
 def create_detailed_player():
     player = Entity(model=None, collider='box', scale=(0.82, 1.78, 0.82), y=0.5)
     Entity(parent=player, model='cube', color=color.rgb(0.18, 0.18, 0.22), scale=(0.32, 0.65, 0.32), position=(-0.22, 0.55, 0))
@@ -157,7 +157,7 @@ Text("🪖 Aetherforged Plate\n   +15 Armor | Mana Regen", parent=equipment_pane
 Text("STATS", parent=equipment_panel, scale=1.4, color=color.cyan, y=-0.26, origin=(0, 0))
 stats_text = Text("Level 7  •  Mana 95/100\nHealth 100/100  •  Strength 18", parent=equipment_panel, scale=0.95, color=color.white, y=-0.38, origin=(0, 0))
 
-# Options Menu (Esc)
+# Options Menu
 options_panel = Entity(parent=camera.ui, model='quad', scale=(0.48, 0.62), color=color.rgba(0.04, 0.02, 0.07, 0.96), position=(0, 0), enabled=False)
 Text("OPTIONS", parent=options_panel, scale=2.5, color=color.gold, y=0.42, origin=(0, 0))
 Text("Camera Sensitivity", parent=options_panel, scale=1.5, color=color.white, y=0.22, origin=(0, 0))
@@ -252,9 +252,9 @@ def update():
     mana_text.text = f"Mana: {player_stats.mana}/100"
 
 print("=" * 60)
-print("ELY NDRIA CHRONICLES - v1.7 FINAL")
-print("Icon warning spam fixed — no more lag!")
-print("Press Esc for Options menu with working sensitivity slider")
+print("ELY NDRIA CHRONICLES - v1.8 FINAL")
+print("Icon warning completely silenced — no more spam or lag!")
+print("Press Esc for Options menu")
 print("Enjoy your quest, Aether Knight!")
 print("=" * 60)
 
