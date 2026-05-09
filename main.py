@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Elyndria Chronicles - v2.3 (Stutter reduction + development mode off)
+Elyndria Chronicles - v2.4 (FORCED small scale + performance fix)
 """
 
 # Disable icon loading
@@ -13,7 +13,8 @@ import random
 import os
 
 app = Ursina()
-application.development_mode = False   # Major stutter reduction
+application.development_mode = False
+application.target_fps = 60
 
 window.fullscreen = False
 window.size = (1280, 720)
@@ -33,25 +34,31 @@ camera_distance = 11.0
 target_yaw = 0.0
 target_pitch = 18.0
 target_distance = 11.0
-SMOOTH_SPEED = 10.0
+SMOOTH_SPEED = 8.0
 camera_sensitivity = 280.0
 
 velocity = Vec3(0, 0, 0)
 vy = 0.0
 on_ground = True
-MOVE_SPEED = 11.0
-ACCEL = 28.0
-FRICTION = 9.0
-JUMP_FORCE = 11.0
-GRAVITY = 28.0
+MOVE_SPEED = 8.0
+ACCEL = 22.0
+FRICTION = 12.0
+JUMP_FORCE = 10.0
+GRAVITY = 25.0
 
 player_stats = type('PlayerStats', (), {'mana': 95})()
 current_dialogue = []
 dialogue_index = 0
 
-# PLAYER (scaled down)
+# PLAYER - FORCED SMALL SCALE
 def create_detailed_player():
-    player = Entity(model='assets/player.obj', collider='box', scale=0.25, y=0.5)
+    print("=== LOADING PLAYER MODEL WITH SCALE 0.1 ===")  # Debug print
+    player = Entity(
+        model='assets/player.obj',
+        collider='box',
+        scale=0.1,                    # FORCED VERY SMALL
+        y=0.5
+    )
     
     sword = Entity(parent=player, model='cube', color=color.rgb(0.72, 0.74, 0.80), scale=(0.07, 1.85, 0.11), position=(0.65, 1.35, 0.35), rotation=(22, 8, 4))
     Entity(parent=sword, model='cube', color=color.gold, scale=(0.38, 0.07, 0.18), position=(0, 0.58, 0))
@@ -206,7 +213,7 @@ def input(key):
         equipment_panel.enabled = False
         dialogue_box.enabled = False
 
-# UPDATE with FPS counter
+# UPDATE
 fps_text = Text("FPS: --", position=(-0.78, -0.45), scale=1.2, color=color.yellow, background=True)
 frame_count = 0
 last_time = 0
@@ -246,15 +253,15 @@ def update():
     
     if move_dir.length() > 0.01:
         move_dir = move_dir.normalized()
-        velocity += move_dir * 28 * time.dt
-        if velocity.length() > 11: velocity = velocity.normalized() * 11
-        player.rotation_y = lerp(player.rotation_y, math.degrees(math.atan2(move_dir.x, move_dir.z)), time.dt * 11)
+        velocity += move_dir * 22 * time.dt
+        if velocity.length() > 8: velocity = velocity.normalized() * 8
+        player.rotation_y = lerp(player.rotation_y, math.degrees(math.atan2(move_dir.x, move_dir.z)), time.dt * 10)
     else:
-        velocity *= (1 - 9 * time.dt)
+        velocity *= (1 - 12 * time.dt)
         if velocity.length() < 0.6: velocity = Vec3(0, 0, 0)
     
     player.position += velocity * time.dt
-    vy -= 28 * time.dt
+    vy -= 25 * time.dt
     player.y += vy * time.dt
     if player.y <= 0.5:
         player.y = 0.5
@@ -264,9 +271,9 @@ def update():
     mana_text.text = f"Mana: {player_stats.mana}/100"
 
 print("=" * 60)
-print("ELY NDRIA CHRONICLES - v2.3 FINAL")
-print("development_mode = False + lower lerp speed = less stutter")
-print("Player scale = 0.25 (4x smaller)")
+print("ELY NDRIA CHRONICLES - v2.4 FINAL")
+print("FORCED scale=0.1 + development_mode=False + target_fps=60")
+print("If you still see big model, your git pull did not work!")
 print("Press Esc for Options menu")
 print("Enjoy your quest, Aether Knight!")
 print("=" * 60)
