@@ -9,7 +9,7 @@ Elyndria Chronicles - Fully Fixed + Logging Version
 from ursina import *
 import math
 import random
-import time as pytime
+import time as real_time
 import traceback
 
 print("[INFO] Starting Elyndria Chronicles...")
@@ -309,7 +309,7 @@ def update():
             target_yaw = math.degrees(math.atan2(move_dir.x, move_dir.z))
             player.rotation_y = lerp(player.rotation_y, target_yaw, 10 * time.dt)
             if hasattr(player, 'head'):
-                player.head.y = 2.05 + math.sin(pytime.time() * 8) * 0.015
+                player.head.y = 2.05 + math.sin(real_time.time() * 8) * 0.015
         
         player.x = clamp(player.x, -96, 96)
         player.z = clamp(player.z, -96, 96)
@@ -325,7 +325,7 @@ def update():
         for npc_data in npcs:
             npc = npc_data['entity']
             if hasattr(npc, 'head'):
-                npc.head.rotation_y = math.sin(pytime.time() * 0.6) * 4
+                npc.head.rotation_y = math.sin(real_time.time() * 0.6) * 4
                 
     except Exception as e:
         print(f"[ERROR] Exception in update(): {e}")
@@ -348,14 +348,16 @@ def attack_sword():
 
 
 def cast_fireball():
+    if player_stats.mana <= 8:
+        print("[INFO] Not enough mana to cast fireball!")
+        return
     start_pos = player.position + (0, 1.6, 0) + player.forward * 1.2
     fb = Entity(model='sphere', color=color.rgb(1, 0.45, 0.1), scale=0.55, position=start_pos)
     core = Entity(parent=fb, model='sphere', color=color.rgb(1, 0.9, 0.5), scale=0.6)
     PointLight(parent=core, color=color.orange, range=6, intensity=1.2)
     fb.animate_position(start_pos + player.forward * 32, duration=1.4, curve=curve.linear)
     destroy(fb, delay=1.6)
-    if player_stats.mana > 8:
-        player_stats.mana = max(0, player_stats.mana - 8)
+    player_stats.mana = max(0, player_stats.mana - 8)
 
 
 # ============== DIALOGUE & UI ==============
