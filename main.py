@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Elyndria Chronicles - Fully Fixed & Enhanced (v1.3 - Camera Responsiveness Fix)
-- RMB orbit now works reliably (mouse.locked=False + separate rotation axes + boosted sensitivity)
-- All previous fixes preserved (movement, NPCs, dialogue, no crashes)
+Elyndria Chronicles - Fully Fixed & Enhanced (v1.4 - FINAL with Options Menu)
+- Much higher default camera sensitivity (280)
+- Full Options menu on Esc with live Camera Sensitivity slider (50-500)
+- All previous fixes (movement, NPCs, dialogue, equipment, no crashes)
 """
 
 from ursina import *
@@ -24,7 +25,7 @@ target_yaw = 0.0
 target_pitch = 18.0
 target_distance = 11.0
 SMOOTH_SPEED = 14.0   # faster camera response while still smooth
-MOUSE_SENS = 140.0   # much higher for responsive RMB orbit on all systems
+camera_sensitivity = 280.0   # default - adjustable in options menu (Esc)
 
 velocity = Vec3(0, 0, 0)
 vy = 0.0
@@ -211,7 +212,7 @@ lirael_lines = [
 
 # ==================== UI ====================
 controls_text = Text(
-    "WASD: Move  |  Right Mouse: Orbit Camera  |  Scroll: Zoom  |  Left Click: Attack  |  Q: Fireball  |  E: Interact  |  C: Equipment  |  Space: Jump  |  Esc: Quit",
+    "WASD: Move  |  Right Mouse: Orbit Camera  |  Scroll: Zoom  |  Left Click: Attack  |  Q: Fireball  |  E: Interact  |  C: Equipment  |  Space: Jump  |  Esc: Options",
     position=(0, 0.46), origin=(0, 0), scale=0.72, color=color.white, background=True
 )
 
@@ -234,6 +235,28 @@ Text("🛡 Eternal Ward Shield\n   +22 Defense | Void Resistant", parent=equipme
 Text("🪖 Aetherforged Plate\n   +15 Armor | Mana Regen", parent=equipment_panel, scale=0.95, color=color.rgb(0.7, 0.75, 0.85), y=-0.14, origin=(0, 0))
 Text("STATS", parent=equipment_panel, scale=1.4, color=color.cyan, y=-0.26, origin=(0, 0))
 stats_text = Text("Level 7  •  Mana 95/100\nHealth 100/100  •  Strength 18", parent=equipment_panel, scale=0.95, color=color.white, y=-0.38, origin=(0, 0))
+
+# ==================== OPTIONS MENU (Esc) ====================
+options_panel = Entity(parent=camera.ui, model='quad', scale=(0.42, 0.55), color=color.rgba(0.04, 0.02, 0.07, 0.96), 
+                       position=(0, 0), enabled=False)
+
+Text("OPTIONS", parent=options_panel, scale=2.2, color=color.gold, y=0.38, origin=(0, 0))
+Text("Camera Sensitivity", parent=options_panel, scale=1.3, color=color.white, y=0.18, origin=(0, 0))
+
+sens_slider = Slider(min=50, max=500, default=280, step=5, 
+                     text="", parent=options_panel, y=0.05, scale=0.85, 
+                     color=color.azure, handle_color=color.gold)
+
+def update_sensitivity():
+    global camera_sensitivity
+    camera_sensitivity = sens_slider.value
+sens_slider.on_value_changed = update_sensitivity
+
+Button("Close", parent=options_panel, scale=(0.25, 0.08), y=-0.18, color=color.rgb(0.3, 0.3, 0.4),
+       text_color=color.white, on_click=lambda: setattr(options_panel, 'enabled', False))
+
+Button("Quit Game", parent=options_panel, scale=(0.25, 0.08), y=-0.32, color=color.rgb(0.5, 0.15, 0.15),
+       text_color=color.white, on_click=application.quit)
 
 # ==================== INPUT HANDLING ====================
 def input(key):
@@ -305,9 +328,12 @@ def input(key):
     if key == 'c':
         equipment_panel.enabled = not equipment_panel.enabled
     
-    # Quit
+    # Options menu (Esc)
     if key == 'escape':
-        application.quit()
+        options_panel.enabled = not options_panel.enabled
+        # also close other panels for cleanliness
+        equipment_panel.enabled = False
+        dialogue_box.enabled = False
 
 # ==================== UPDATE LOOP ====================
 def update():
@@ -316,8 +342,8 @@ def update():
     
     # === CAMERA ORBIT (smooth) ===
     if held_keys['right mouse']:
-        target_yaw += mouse.velocity[0] * MOUSE_SENS * time.dt
-        target_pitch -= mouse.velocity[1] * MOUSE_SENS * time.dt
+        target_yaw += mouse.velocity[0] * camera_sensitivity * time.dt
+        target_pitch -= mouse.velocity[1] * camera_sensitivity * time.dt
         target_pitch = max(-62, min(72, target_pitch))
     
     # Smooth lerp camera
@@ -375,11 +401,10 @@ def update():
 
 # ==================== START MESSAGE ====================
 print("=" * 60)
-print("ELY NDRIA CHRONICLES - FULLY FIXED & ENHANCED (v1.3 - Camera Fix)")
+print("ELY NDRIA CHRONICLES - FULLY FIXED & ENHANCED (v1.4 - FINAL with Options Menu)")
 print("Camera: Smooth orbit + zoom lerp  |  Movement: Velocity + jump + gravity")
-print("Features: Detailed player/NPCs, interactive dialogue, equipment panel, scenic world")
-print("RMB orbit now works great! Hold right mouse + drag to look around.")
-print("Enjoy your quest, Aether Knight!")
+print("Press Esc → Options menu with live Camera Sensitivity slider (50-500)")
+print("All features complete. Enjoy your quest, Aether Knight!")
 print("=" * 60)
 
 app.run()
