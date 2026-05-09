@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Elyndria Chronicles - v2.1 FINAL (Aspect ratio spam + icon + emoji fixed)
+Elyndria Chronicles - v2.2 (Using real player.obj asset)
 """
 
-# Disable icon loading completely (must be before importing ursina)
+# Disable icon loading
 from panda3d.core import loadPrcFileData
 loadPrcFileData("", "icon-filename ")
 
@@ -14,7 +14,6 @@ import os
 
 app = Ursina()
 
-# Fix rapid aspect ratio changes and fullscreen issues
 window.fullscreen = False
 window.size = (1280, 720)
 window.title = "Elyndria Chronicles"
@@ -22,12 +21,9 @@ window.borderless = False
 window.exit_button.visible = False
 mouse.locked = False
 
-# Force delete any bad icon file
 if os.path.exists("textures/ursina.ico"):
-    try:
-        os.remove("textures/ursina.ico")
-    except:
-        pass
+    try: os.remove("textures/ursina.ico")
+    except: pass
 
 # GLOBALS
 yaw = 0.0
@@ -52,38 +48,47 @@ player_stats = type('PlayerStats', (), {'mana': 95})()
 current_dialogue = []
 dialogue_index = 0
 
-# PLAYER
+# ==================== PLAYER (now using real .obj asset) ====================
 def create_detailed_player():
-    player = Entity(model=None, collider='box', scale=(0.82, 1.78, 0.82), y=0.5)
-    Entity(parent=player, model='cube', color=color.rgb(0.18, 0.18, 0.22), scale=(0.32, 0.65, 0.32), position=(-0.22, 0.55, 0))
-    Entity(parent=player, model='cube', color=color.rgb(0.18, 0.18, 0.22), scale=(0.32, 0.65, 0.32), position=(0.22, 0.55, 0))
-    Entity(parent=player, model='cube', color=color.rgb(0.82, 0.68, 0.22), scale=(0.36, 0.14, 0.36), position=(-0.22, 0.22, 0))
-    Entity(parent=player, model='cube', color=color.rgb(0.82, 0.68, 0.22), scale=(0.36, 0.14, 0.36), position=(0.22, 0.22, 0))
-    Entity(parent=player, model='cube', color=color.rgb(0.28, 0.30, 0.36), scale=(0.88, 0.95, 0.58), position=(0, 1.15, 0))
-    Entity(parent=player, model='cube', color=color.gold, scale=(1.05, 0.12, 0.68), position=(0, 1.65, 0))
-    Entity(parent=player, model='cube', color=color.gold, scale=(1.05, 0.12, 0.68), position=(0, 0.72, 0))
-    Entity(parent=player, model='sphere', color=color.rgb(0.2, 0.6, 0.9), scale=0.22, position=(0, 1.25, 0.32))
-    head = Entity(parent=player, model='sphere', color=color.rgb(0.96, 0.82, 0.74), scale=0.42, position=(0, 1.98, 0))
-    Entity(parent=player, model='sphere', color=color.rgb(0.38, 0.38, 0.42), scale=0.48, position=(0, 2.02, 0))
-    Entity(parent=player, model='cube', color=color.gold, scale=(0.52, 0.12, 0.52), position=(0, 2.22, 0))
-    Entity(parent=player, model='cube', color=color.rgb(0.15, 0.15, 0.2), scale=(0.38, 0.18, 0.1), position=(0, 2.0, 0.38))
-    Entity(parent=player, model='cube', color=color.rgb(0.28, 0.30, 0.36), scale=(0.22, 0.68, 0.22), position=(-0.52, 1.28, 0), rotation=(0, 0, 18))
-    Entity(parent=player, model='cube', color=color.rgb(0.28, 0.30, 0.36), scale=(0.22, 0.68, 0.22), position=(0.52, 1.28, 0), rotation=(0, 0, -18))
-    Entity(parent=player, model='cube', color=color.rgb(0.75, 0.72, 0.68), scale=(0.26, 0.18, 0.26), position=(-0.58, 0.92, 0))
-    Entity(parent=player, model='cube', color=color.rgb(0.75, 0.72, 0.68), scale=(0.26, 0.18, 0.26), position=(0.58, 0.92, 0))
-    sword = Entity(parent=player, model='cube', color=color.rgb(0.72, 0.74, 0.80), scale=(0.07, 1.85, 0.11), position=(0.68, 1.38, 0.38), rotation=(22, 8, 4))
+    # Load the real player model you added
+    player = Entity(
+        model='assets/player.obj',
+        collider='box',
+        scale=1.0,
+        y=0.5
+    )
+    
+    # Add sword and shield as child entities (attached to the real model)
+    sword = Entity(
+        parent=player,
+        model='cube',
+        color=color.rgb(0.72, 0.74, 0.80),
+        scale=(0.07, 1.85, 0.11),
+        position=(0.65, 1.35, 0.35),
+        rotation=(22, 8, 4)
+    )
     Entity(parent=sword, model='cube', color=color.gold, scale=(0.38, 0.07, 0.18), position=(0, 0.58, 0))
     Entity(parent=sword, model='sphere', color=color.rgb(0.3, 0.7, 1), scale=0.09, position=(0, -0.85, 0))
     player.sword = sword
-    shield = Entity(parent=player, model='cube', color=color.rgb(0.55, 0.22, 0.18), scale=(0.12, 1.15, 0.85), position=(-0.62, 1.28, -0.08), rotation=(0, -28, 0))
+    
+    shield = Entity(
+        parent=player,
+        model='cube',
+        color=color.rgb(0.55, 0.22, 0.18),
+        scale=(0.12, 1.15, 0.85),
+        position=(-0.58, 1.25, -0.05),
+        rotation=(0, -28, 0)
+    )
     Entity(parent=shield, model='sphere', color=color.gold, scale=0.22, position=(0, 0, 0.12))
     Entity(parent=shield, model='cube', color=color.gold, scale=(0.14, 0.08, 0.9), position=(0, 0.45, 0.13))
     player.shield = shield
-    Entity(parent=player, model='cube', color=color.rgb(0.12, 0.08, 0.22), scale=(1.05, 1.15, 0.12), position=(0, 1.08, -0.42), rotation=(4, 0, 0))
+    
     return player
 
 player = create_detailed_player()
 player.position = (0, 0.5, 0)
+
+# ... rest of the game code remains the same ...
 
 camera_pivot = Entity(parent=player, y=1.85)
 camera.parent = camera_pivot
@@ -263,8 +268,8 @@ def update():
     mana_text.text = f"Mana: {player_stats.mana}/100"
 
 print("=" * 60)
-print("ELY NDRIA CHRONICLES - v2.1 FINAL")
-print("Aspect ratio spam fixed + icon warnings removed")
+print("ELY NDRIA CHRONICLES - v2.2 FINAL (Now using your player.obj asset!)")
+print("Real 3D player model loaded from assets/player.obj")
 print("Press Esc for Options menu")
 print("Enjoy your quest, Aether Knight!")
 print("=" * 60)
