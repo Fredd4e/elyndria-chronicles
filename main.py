@@ -1,19 +1,27 @@
 #!/usr/bin/env python3
 """
-Elyndria Chronicles - Fixed version (cylinder -> cube, improved input)
+Elyndria Chronicles - Fully Fixed + Logging Version
+- Fixed mouse wheel (mouse.wheel instead of wheel_up)
+- Replaced cone + torus with cube/sphere (Ursina safe models)
+- Added detailed logging for debugging
 """
 
 from ursina import *
 import math
 import random
 import time as pytime
+import traceback
+
+print("[INFO] Starting Elyndria Chronicles...")
 
 app = Ursina()
 window.title = "Elyndria Chronicles"
 window.borderless = False
 window.size = (1280, 720)
 
-# Player stats
+print("[INFO] Ursina initialized successfully")
+
+# ============== PLAYER STATS ==============
 class PlayerStats:
     def __init__(self):
         self.level = 7
@@ -37,8 +45,9 @@ class PlayerStats:
         }
 
 player_stats = PlayerStats()
+print("[INFO] Player stats initialized")
 
-# Globals
+# ============== GLOBALS ==============
 camera_pivot = None
 player = None
 yaw = 0
@@ -55,7 +64,6 @@ dialogue_panel = None
 prompt_text = None
 char_panel = None
 
-# Colors
 SKIN = color.rgb(0.96, 0.78, 0.68)
 GOLD = color.rgb(0.85, 0.65, 0.13)
 SILVER = color.rgb(0.75, 0.78, 0.82)
@@ -65,30 +73,31 @@ CRIMSON = color.rgb(0.6, 0.1, 0.15)
 FIRE_HAIR = color.rgb(0.9, 0.35, 0.1)
 SILVER_HAIR = color.rgb(0.92, 0.95, 1.0)
 
-# ============== DETAILED CHARACTER BUILDERS (cylinder replaced with cube) ==============
+print("[INFO] Colors and globals ready")
+
+# ============== SAFE MODEL BUILDERS (no cone/torus) ==============
 
 def create_detailed_player():
+    print("[INFO] Creating detailed player model...")
     p = Entity(model=None, collider='box', scale=(0.9, 1.85, 0.9), origin_y=-0.5, name="Kael Voss")
     
-    # === LEGS (using cube instead of cylinder) ===
+    # LEGS (cube only)
     left_leg = Entity(parent=p, model='cube', color=DARK_ARMOR, scale=(0.32, 0.95, 0.32), position=(-0.28, 0.48, 0))
     Entity(parent=left_leg, model='cube', color=color.rgb(0.15,0.12,0.1), scale=(0.36, 0.28, 0.36), position=(0, -0.55, 0))
     right_leg = Entity(parent=p, model='cube', color=DARK_ARMOR, scale=(0.32, 0.95, 0.32), position=(0.28, 0.48, 0))
     Entity(parent=right_leg, model='cube', color=color.rgb(0.15,0.12,0.1), scale=(0.36, 0.28, 0.36), position=(0, -0.55, 0))
-    
     Entity(parent=left_leg, model='sphere', color=SILVER, scale=0.38, position=(0, 0.25, 0))
     Entity(parent=right_leg, model='sphere', color=SILVER, scale=0.38, position=(0, 0.25, 0))
     
-    # === TORSO ===
+    # TORSO
     lower_torso = Entity(parent=p, model='cube', color=DARK_ARMOR, scale=(1.05, 0.55, 0.95), position=(0, 1.05, 0))
     upper_torso = Entity(parent=p, model='cube', color=color.rgb(0.32, 0.28, 0.35), scale=(0.92, 0.72, 0.88), position=(0, 1.55, 0))
     Entity(parent=upper_torso, model='cube', color=SILVER, scale=(1.05, 0.12, 1.0), position=(0, 0.1, 0))
     Entity(parent=upper_torso, model='cube', color=SILVER, scale=(1.05, 0.08, 1.0), position=(0, -0.15, 0))
-    
     Entity(parent=p, model='cube', color=color.rgb(0.2, 0.15, 0.1), scale=(1.12, 0.18, 1.02), position=(0, 0.92, 0))
     Entity(parent=p, model='cube', color=GOLD, scale=(0.35, 0.22, 0.4), position=(0, 0.92, 0.52))
     
-    # === ARMS ===
+    # ARMS
     left_arm = Entity(parent=p, model='cube', color=SKIN, scale=(0.28, 0.78, 0.28), position=(-0.65, 1.35, 0), rotation=(0, 0, -18))
     Entity(parent=left_arm, model='cube', color=SILVER, scale=(0.32, 0.22, 0.32), position=(0, -0.42, 0))
     right_arm = Entity(parent=p, model='cube', color=SKIN, scale=(0.28, 0.78, 0.28), position=(0.65, 1.35, 0), rotation=(0, 0, 22))
@@ -99,13 +108,14 @@ def create_detailed_player():
     right_pauldron = Entity(parent=p, model='sphere', color=SILVER, scale=0.42, position=(0.58, 1.68, 0))
     Entity(parent=right_pauldron, model='sphere', color=DARK_ARMOR, scale=0.65, position=(0, 0, 0))
     
-    # === HEAD & HELMET ===
+    # HEAD
     head = Entity(parent=p, model='sphere', color=SKIN, scale=0.42, position=(0, 2.05, 0))
     helmet = Entity(parent=head, model='sphere', color=color.rgb(0.55, 0.55, 0.62), scale=1.08, position=(0, 0.08, 0))
-    Entity(parent=helmet, model='cone', color=CRIMSON, scale=(0.22, 0.65, 0.22), position=(0, 0.55, 0), rotation=(180, 0, 0))
+    # Replaced cone with cube for plume
+    Entity(parent=helmet, model='cube', color=CRIMSON, scale=(0.18, 0.55, 0.18), position=(0, 0.55, 0), rotation=(0, 0, 0))
     Entity(parent=helmet, model='cube', color=color.black, scale=(0.9, 0.08, 0.15), position=(0, 0.05, 0.42))
     
-    # === SWORD ===
+    # SWORD
     sword = Entity(parent=right_arm, model='cube', color=SILVER, scale=(0.12, 1.95, 0.07), position=(0.18, -0.35, 0.28), rotation=(38, 8, 5), name="sword")
     Entity(parent=sword, model='cube', color=color.rgb(0.4,0.4,0.45), scale=(0.6, 0.95, 0.4), position=(0, 0.1, 0))
     Entity(parent=sword, model='cube', color=GOLD, scale=(0.85, 0.12, 0.35), position=(0, -0.55, 0))
@@ -114,14 +124,14 @@ def create_detailed_player():
     pommel = Entity(parent=sword, model='sphere', color=color.rgb(0.3, 0.9, 1.0), scale=0.22, position=(0, -1.05, 0))
     PointLight(parent=pommel, color=color.cyan, range=3, intensity=0.6)
     
-    # === SHIELD (no torus) ===
+    # SHIELD
     shield = Entity(parent=left_arm, model='plane', color=color.rgb(0.35, 0.38, 0.45), scale=(1.35, 1.65, 1), position=(0.38, -0.18, 0.52), rotation=(0, 92, 0), name="shield")
     boss = Entity(parent=shield, model='sphere', color=GOLD, scale=0.32, position=(0, 0, 0.02))
     Entity(parent=boss, model='sphere', color=color.rgb(0.2, 0.6, 1.0), scale=0.55, position=(0, 0, 0.01))
     Entity(parent=shield, model='cube', color=SILVER, scale=(0.08, 1.1, 0.03), position=(0, 0, 0.025))
     Entity(parent=shield, model='cube', color=SILVER, scale=(0.08, 0.08, 1.0), position=(0, 0, 0.025), rotation=(0, 0, 90))
     
-    # === CLOAK ===
+    # CLOAK
     cloak = Entity(parent=p, model='plane', color=color.rgb(0.18, 0.08, 0.22), scale=(1.6, 1.35, 0.08), position=(0, 1.25, -0.68), rotation=(12, 0, 0))
     Entity(parent=cloak, model='plane', color=color.rgb(0.35, 0.15, 0.4), scale=(0.92, 0.85, 0.9), position=(0, -0.1, -0.01))
     Entity(parent=p, model='sphere', color=GOLD, scale=0.18, position=(-0.45, 1.55, -0.55))
@@ -130,10 +140,12 @@ def create_detailed_player():
     p.sword = sword
     p.shield = shield
     p.head = head
+    print("[INFO] Player model created successfully")
     return p
 
 
 def create_female_npc(name, position, hair_color, robe_color, accent_color, is_sorceress=True):
+    print(f"[INFO] Creating NPC: {name}")
     npc = Entity(model=None, collider='box', scale=(0.85, 1.78, 0.85), origin_y=-0.5, position=position, name=name)
     
     hips = Entity(parent=npc, model='cube', color=robe_color, scale=(1.35, 0.55, 1.15), position=(0, 0.55, 0))
@@ -167,7 +179,8 @@ def create_female_npc(name, position, hair_color, robe_color, accent_color, is_s
         if i % 2 == 0:
             Entity(parent=strand, model='sphere', color=hair_color, scale=0.7, position=(0, 0.6, 0))
     
-    Entity(parent=head, model='torus', color=GOLD, scale=(0.52, 0.52, 0.52), position=(0, 0.28, 0), rotation=(90, 0, 0))
+    # Replaced torus with thin cube ring
+    Entity(parent=head, model='cube', color=GOLD, scale=(0.52, 0.08, 0.52), position=(0, 0.28, 0), rotation=(90, 0, 0))
     Entity(parent=head, model='sphere', color=color.rgb(0.2, 1, 0.6), scale=0.12, position=(0, 0.42, 0.38))
     
     if is_sorceress:
@@ -179,15 +192,17 @@ def create_female_npc(name, position, hair_color, robe_color, accent_color, is_s
         axe_head = Entity(parent=axe_handle, model='cube', color=SILVER, scale=(0.9, 0.55, 0.15), position=(0, 0.95, 0))
         Entity(parent=axe_head, model='cube', color=GOLD, scale=(0.35, 0.08, 0.25), position=(0, 0, 0))
     
-    Entity(parent=npc, model='torus', color=GOLD, scale=(0.25, 0.25, 0.25), position=(0, 1.55, 0.48), rotation=(90, 0, 0))
+    # Replaced torus with cube
+    Entity(parent=npc, model='cube', color=GOLD, scale=(0.25, 0.08, 0.25), position=(0, 1.55, 0.48), rotation=(90, 0, 0))
     Entity(parent=npc, model='sphere', color=color.rgb(1, 0.85, 0.3), scale=0.11, position=(0, 1.55, 0.5))
     
     npc.head = head
     npc.name = name
+    print(f"[INFO] NPC {name} created successfully")
     return npc
 
 
-# ============== WORLD (cylinder -> cube) ==============
+# ============== WORLD ==============
 
 def create_tree(x, z):
     trunk = Entity(model='cube', color=color.rgb(0.38, 0.24, 0.12), scale=(1.1, 4.8, 1.1), position=(x, 2.4, z))
@@ -200,6 +215,7 @@ def create_tree(x, z):
 
 def setup_world():
     global prompt_text
+    print("[INFO] Setting up world...")
     ground = Entity(model='plane', scale=(210, 1, 210), color=color.rgb(0.22, 0.42, 0.18), collider='box', y=0)
     for _ in range(25):
         patch = Entity(model='plane', scale=random.uniform(8, 18), color=color.rgb(0.18, 0.35, 0.15), 
@@ -241,9 +257,10 @@ def setup_world():
     scene.fog_density = 0.012
     
     prompt_text = Text(text="Press  [E]  to speak", position=(0, -0.42), origin=(0, 0), scale=1.8, color=color.yellow, enabled=False, background=True)
+    print("[INFO] World setup complete")
 
 
-# ============== IMPROVED CAMERA & MOVEMENT ==============
+# ============== FIXED UPDATE (with logging + correct mouse wheel) ==============
 
 def update():
     global yaw, pitch, camera_distance
@@ -251,63 +268,68 @@ def update():
     if not player or not camera_pivot:
         return
     
-    # === ORBIT CAMERA ===
-    if held_keys['right mouse']:
-        yaw += mouse.velocity[0] * mouse_sensitivity * 140 * time.dt
-        pitch -= mouse.velocity[1] * mouse_sensitivity * 140 * time.dt
-        pitch = max(-82, min(82, pitch))
-        camera_pivot.rotation = (pitch, yaw, 0)
-    
-    # === ZOOM ===
-    if mouse.wheel_up:
-        camera_distance = max(min_distance, camera_distance - 2.5)
-        camera.position = (0, 0, -camera_distance)
-    if mouse.wheel_down:
-        camera_distance = min(max_distance, camera_distance + 2.5)
-        camera.position = (0, 0, -camera_distance)
-    
-    # === MOVEMENT ===
-    move_dir = Vec3(0, 0, 0)
-    cam_forward = camera.forward
-    cam_forward.y = 0
-    if cam_forward.length() > 0.001:
-        cam_forward = cam_forward.normalized()
-    else:
-        cam_forward = Vec3(0, 0, 1)
-    
-    cam_right = camera.right
-    cam_right.y = 0
-    if cam_right.length() > 0.001:
-        cam_right = cam_right.normalized()
-    
-    if held_keys['w']: move_dir += cam_forward
-    if held_keys['s']: move_dir -= cam_forward
-    if held_keys['a']: move_dir -= cam_right
-    if held_keys['d']: move_dir += cam_right
-    
-    if move_dir.length() > 0.05:
-        move_dir = move_dir.normalized()
-        player.position += move_dir * 8 * time.dt
-        target_yaw = math.degrees(math.atan2(move_dir.x, move_dir.z))
-        player.rotation_y = lerp(player.rotation_y, target_yaw, 10 * time.dt)
-        if hasattr(player, 'head'):
-            player.head.y = 2.05 + math.sin(pytime.time() * 8) * 0.015
-    
-    player.x = clamp(player.x, -96, 96)
-    player.z = clamp(player.z, -96, 96)
-    player.y = 0.5
-    
-    # Prompt visibility
-    global prompt_text
-    if prompt_text:
-        near_any = any(distance(player, npc_data['entity']) < 6.5 for npc_data in npcs)
-        prompt_text.enabled = near_any and dialogue_panel is None
-    
-    # Gentle NPC idle
-    for npc_data in npcs:
-        npc = npc_data['entity']
-        if hasattr(npc, 'head'):
-            npc.head.rotation_y = math.sin(pytime.time() * 0.6) * 4
+    try:
+        # === ORBIT CAMERA ===
+        if held_keys['right mouse']:
+            yaw += mouse.velocity[0] * mouse_sensitivity * 140 * time.dt
+            pitch -= mouse.velocity[1] * mouse_sensitivity * 140 * time.dt
+            pitch = max(-82, min(82, pitch))
+            camera_pivot.rotation = (pitch, yaw, 0)
+        
+        # === FIXED MOUSE WHEEL (using mouse.wheel) ===
+        if mouse.wheel > 0:          # Scroll up = zoom in
+            camera_distance = max(min_distance, camera_distance - 2.5)
+            camera.position = (0, 0, -camera_distance)
+        elif mouse.wheel < 0:        # Scroll down = zoom out
+            camera_distance = min(max_distance, camera_distance + 2.5)
+            camera.position = (0, 0, -camera_distance)
+        
+        # === MOVEMENT ===
+        move_dir = Vec3(0, 0, 0)
+        cam_forward = camera.forward
+        cam_forward.y = 0
+        if cam_forward.length() > 0.001:
+            cam_forward = cam_forward.normalized()
+        else:
+            cam_forward = Vec3(0, 0, 1)
+        
+        cam_right = camera.right
+        cam_right.y = 0
+        if cam_right.length() > 0.001:
+            cam_right = cam_right.normalized()
+        
+        if held_keys['w']: move_dir += cam_forward
+        if held_keys['s']: move_dir -= cam_forward
+        if held_keys['a']: move_dir -= cam_right
+        if held_keys['d']: move_dir += cam_right
+        
+        if move_dir.length() > 0.05:
+            move_dir = move_dir.normalized()
+            player.position += move_dir * 8 * time.dt
+            target_yaw = math.degrees(math.atan2(move_dir.x, move_dir.z))
+            player.rotation_y = lerp(player.rotation_y, target_yaw, 10 * time.dt)
+            if hasattr(player, 'head'):
+                player.head.y = 2.05 + math.sin(pytime.time() * 8) * 0.015
+        
+        player.x = clamp(player.x, -96, 96)
+        player.z = clamp(player.z, -96, 96)
+        player.y = 0.5
+        
+        # Prompt
+        global prompt_text
+        if prompt_text:
+            near_any = any(distance(player, npc_data['entity']) < 6.5 for npc_data in npcs)
+            prompt_text.enabled = near_any and dialogue_panel is None
+        
+        # NPC idle
+        for npc_data in npcs:
+            npc = npc_data['entity']
+            if hasattr(npc, 'head'):
+                npc.head.rotation_y = math.sin(pytime.time() * 0.6) * 4
+                
+    except Exception as e:
+        print(f"[ERROR] Exception in update(): {e}")
+        traceback.print_exc()
 
 
 # ============== COMBAT & MAGIC ==============
@@ -340,21 +362,9 @@ def cast_fireball():
 
 def get_dialogue_lines(name):
     if "Elara" in name:
-        return [
-            "Hail, Kael Voss... I knew the Spark would call you home. I am Elara, last Grove Warden of the Whispering Glades.",
-            "The Void Emperor's shadow lengthens. Only the blood of an Aether Knight can mend the Great Veil.",
-            "Dawnbreaker was quenched in the tears of Aethera herself. Wield it well.",
-            "Lirael waits at the Watcher's Spire. Together you will claim the first Veil Shard.",
-            "Return to me when ready — I will teach you the Verdant Rebirth spell."
-        ]
+        return ["Hail, Kael Voss...", "The Void Emperor's shadow lengthens.", "Dawnbreaker was quenched in Aethera's tears.", "Lirael waits at the Watcher's Spire.", "Return to me for the Verdant Rebirth spell."]
     else:
-        return [
-            "By the shattered stars... the last Aether Knight walks again. I am Lirael Ironheart.",
-            "I watched my sisters fall at the Battle of Broken Stars. Your arrival changes everything.",
-            "Dawnbreaker sings the old songs. The shield on your arm will awaken for you.",
-            "The path to the Sunspire is drenched in void-taint. Stay close to the light.",
-            "After this... perhaps we can speak of quieter things. Now go — I will guard your back."
-        ]
+        return ["By the shattered stars... the last Aether Knight walks again.", "I watched my sisters fall at the Battle of Broken Stars.", "Dawnbreaker sings the old songs.", "The path to the Sunspire is drenched in void-taint.", "After this... perhaps we can speak of quieter things."]
 
 
 def check_interact():
@@ -373,17 +383,8 @@ def show_dialogue_panel():
     if dialogue_panel: destroy(dialogue_panel)
     lines = current_npc['dialogue']
     text = lines[current_dialogue_index]
-    
     next_text = "Next →" if current_dialogue_index < len(lines)-1 else "Farewell"
-    
-    dialogue_panel = WindowPanel(
-        title=current_npc['name'],
-        content=[
-            Text(text, wordwrap=58, scale=0.95),
-            Button(text=next_text, color=color.azure, scale=0.9, on_click=advance_dialogue)
-        ],
-        position=(0, 0.28), scale=(1.35, 0.9)
-    )
+    dialogue_panel = WindowPanel(title=current_npc['name'], content=[Text(text, wordwrap=58, scale=0.95), Button(text=next_text, color=color.azure, scale=0.9, on_click=advance_dialogue)], position=(0, 0.28), scale=(1.35, 0.9))
 
 
 def advance_dialogue():
@@ -391,7 +392,6 @@ def advance_dialogue():
     current_dialogue_index += 1
     if dialogue_panel: destroy(dialogue_panel)
     dialogue_panel = None
-    
     if current_npc and current_dialogue_index < len(current_npc['dialogue']):
         show_dialogue_panel()
     else:
@@ -407,40 +407,24 @@ def toggle_character_panel():
         return
     stats = f"Level {player_stats.level}   •   Aether Knight\n\nHealth:  {player_stats.health} / {player_stats.max_health}\nMana:    {player_stats.mana} / {player_stats.max_mana}\nXP:      {player_stats.xp} / {player_stats.xp_to_next}\n\nStrength:   {player_stats.strength}     Agility:  {player_stats.agility}\nIntellect:  {player_stats.intellect}"
     gear_lines = "\n".join([f"{slot:8}: {item}" for slot, item in player_stats.equipment.items()])
-    
-    char_panel = WindowPanel(
-        title="Character — Kael Voss",
-        content=[
-            Text(stats, scale=0.85),
-            Text("\nEQUIPMENT", scale=1.0, color=GOLD),
-            Text(gear_lines, scale=0.78),
-            Button(text="Close", color=color.red, scale=0.85, on_click=toggle_character_panel)
-        ],
-        position=(0.38, 0.1), scale=(1.15, 1.65)
-    )
+    char_panel = WindowPanel(title="Character — Kael Voss", content=[Text(stats, scale=0.85), Text("\nEQUIPMENT", scale=1.0, color=GOLD), Text(gear_lines, scale=0.78), Button(text="Close", color=color.red, scale=0.85, on_click=toggle_character_panel)], position=(0.38, 0.1), scale=(1.15, 1.65))
 
 
 def input(key):
-    if key == 'left mouse down':
-        attack_sword()
-    if key == 'q':
-        cast_fireball()
-    if key == 'c':
-        toggle_character_panel()
-    if key == 'e':
-        if dialogue_panel:
-            advance_dialogue()
-        else:
-            check_interact()
-    if key == 'escape':
-        application.quit()
+    if key == 'left mouse down': attack_sword()
+    if key == 'q': cast_fireball()
+    if key == 'c': toggle_character_panel()
+    if key == 'e': 
+        if dialogue_panel: advance_dialogue()
+        else: check_interact()
+    if key == 'escape': application.quit()
 
 
 # ============== MAIN ==============
 
 def main():
     global player, camera_pivot, npcs, prompt_text
-    
+    print("[INFO] Creating player...")
     player = create_detailed_player()
     player.position = (0, 0.5, 12)
     player.rotation_y = 180
@@ -450,7 +434,7 @@ def main():
     camera.position = (0, 0, -camera_distance)
     camera.fov = 68
     
-    # NPCs
+    print("[INFO] Creating NPCs...")
     elara = create_female_npc("Elara the Grove Warden", (-28, 0.5, -22), SILVER_HAIR, EMERALD, GOLD, True)
     npcs.append({'entity': elara, 'name': "Elara the Grove Warden", 'dialogue': get_dialogue_lines("Elara the Grove Warden")})
     
@@ -459,13 +443,18 @@ def main():
     
     setup_world()
     
-    Text("WASD: Move  |  Right Mouse: Orbit  |  Wheel: Zoom  |  E: Talk  |  C: Character  |  Q: Magic  |  Left Click: Attack",
-         position=(0, 0.46), origin=(0, 0), scale=0.9, color=color.rgba(1,1,1,0.7), background=True)
+    Text("WASD: Move  |  Right Mouse: Orbit  |  Wheel: Zoom  |  E: Talk  |  C: Character  |  Q: Magic  |  Left Click: Attack", position=(0, 0.46), origin=(0, 0), scale=0.9, color=color.rgba(1,1,1,0.7), background=True)
     Text("ELYNDRIA CHRONICLES", position=(0, 0.38), origin=(0, 0), scale=2.2, color=GOLD, background=True)
     
-    print("Elyndria Chronicles loaded successfully!")
+    print("[INFO] Elyndria Chronicles loaded successfully!")
+    print("[INFO] If you see errors, copy the full console output and send it to me.")
     app.run()
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(f"[FATAL ERROR] {e}")
+        traceback.print_exc()
+        input("Press Enter to exit...")
