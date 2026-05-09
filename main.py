@@ -76,6 +76,15 @@ def input(key):
             destroy(fireball, delay=1.5)
             print(f"[INFO] Fireball cast! Mana left: {player_stats.mana}")
 
+    # Mouse wheel zoom (reliable way)
+    global camera_distance
+    if key == 'scroll up':
+        camera_distance = max(4, camera_distance - 2)
+        camera.position = (0, 0, -camera_distance)
+    if key == 'scroll down':
+        camera_distance = min(25, camera_distance + 2)
+        camera.position = (0, 0, -camera_distance)
+
 # Update - simple and reliable
 yaw = 0
 pitch = 20
@@ -90,14 +99,6 @@ def update():
         pitch -= mouse.velocity[1] * 0.3 * 100 * time.dt
         pitch = max(-70, min(70, pitch))
         camera_pivot.rotation = (pitch, yaw, 0)
-    
-    # Mouse wheel zoom
-    if mouse.wheel > 0:
-        camera_distance = max(4, camera_distance - 2)
-        camera.position = (0, 0, -camera_distance)
-    if mouse.wheel < 0:
-        camera_distance = min(25, camera_distance + 2)
-        camera.position = (0, 0, -camera_distance)
     
     # Movement (camera relative)
     move = Vec3(0)
