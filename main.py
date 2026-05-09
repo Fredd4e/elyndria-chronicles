@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Elyndria Chronicles - Fully Fixed & Enhanced Version (Hotfix v1.2 - Final)
-- Fixed Vec3.clamp_magnitude() compatibility (replaced with length() + normalized() for all Ursina/Panda3D versions)
-- All previous fixes: cylinder → cube, Text wordwrap crash, smooth camera, velocity movement + jump, full features
+Elyndria Chronicles - Fully Fixed & Enhanced (v1.3 - Camera Responsiveness Fix)
+- RMB orbit now works reliably (mouse.locked=False + separate rotation axes + boosted sensitivity)
+- All previous fixes preserved (movement, NPCs, dialogue, no crashes)
 """
 
 from ursina import *
@@ -14,6 +14,7 @@ window.title = "Elyndria Chronicles"
 window.size = (1280, 720)
 window.borderless = False
 window.exit_button.visible = False
+mouse.locked = False          # ensures mouse movement is captured for orbit camera
 
 # ==================== GLOBALS ====================
 yaw = 0.0
@@ -22,8 +23,8 @@ camera_distance = 11.0
 target_yaw = 0.0
 target_pitch = 18.0
 target_distance = 11.0
-SMOOTH_SPEED = 9.0
-MOUSE_SENS = 38.0
+SMOOTH_SPEED = 14.0   # faster camera response while still smooth
+MOUSE_SENS = 140.0   # much higher for responsive RMB orbit on all systems
 
 velocity = Vec3(0, 0, 0)
 vy = 0.0
@@ -322,7 +323,8 @@ def update():
     # Smooth lerp camera
     yaw = lerp(yaw, target_yaw, time.dt * SMOOTH_SPEED)
     pitch = lerp(pitch, target_pitch, time.dt * SMOOTH_SPEED)
-    camera_pivot.rotation = (pitch, yaw, 0)
+    camera_pivot.rotation_x = pitch
+    camera_pivot.rotation_y = yaw
     
     camera_distance = lerp(camera_distance, target_distance, time.dt * SMOOTH_SPEED * 0.7)
     camera.local_position = (0, 0, -camera_distance)
@@ -373,10 +375,10 @@ def update():
 
 # ==================== START MESSAGE ====================
 print("=" * 60)
-print("ELY NDRIA CHRONICLES - FULLY FIXED & ENHANCED (Hotfix v1.2 - FINAL)")
+print("ELY NDRIA CHRONICLES - FULLY FIXED & ENHANCED (v1.3 - Camera Fix)")
 print("Camera: Smooth orbit + zoom lerp  |  Movement: Velocity + jump + gravity")
 print("Features: Detailed player/NPCs, interactive dialogue, equipment panel, scenic world")
-print("100% compatible with your Ursina version. No more errors!")
+print("RMB orbit now works great! Hold right mouse + drag to look around.")
 print("Enjoy your quest, Aether Knight!")
 print("=" * 60)
 
