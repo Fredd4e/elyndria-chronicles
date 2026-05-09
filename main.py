@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Elyndria Chronicles - v2.2 (Using real player.obj asset)
+Elyndria Chronicles - v2.2 (Player model scaled + lag debugging)
 """
 
 # Disable icon loading
@@ -21,6 +21,7 @@ window.borderless = False
 window.exit_button.visible = False
 mouse.locked = False
 
+# Clean up bad icon file
 if os.path.exists("textures/ursina.ico"):
     try: os.remove("textures/ursina.ico")
     except: pass
@@ -48,37 +49,22 @@ player_stats = type('PlayerStats', (), {'mana': 95})()
 current_dialogue = []
 dialogue_index = 0
 
-# ==================== PLAYER (now using real .obj asset) ====================
+# ==================== PLAYER (real .obj - scaled down) ====================
 def create_detailed_player():
-    # Load the real player model you added
     player = Entity(
         model='assets/player.obj',
         collider='box',
-        scale=1.0,
+        scale=0.25,          # 4x smaller than before
         y=0.5
     )
     
-    # Add sword and shield as child entities (attached to the real model)
-    sword = Entity(
-        parent=player,
-        model='cube',
-        color=color.rgb(0.72, 0.74, 0.80),
-        scale=(0.07, 1.85, 0.11),
-        position=(0.65, 1.35, 0.35),
-        rotation=(22, 8, 4)
-    )
+    # Sword and shield attached to the real model
+    sword = Entity(parent=player, model='cube', color=color.rgb(0.72, 0.74, 0.80), scale=(0.07, 1.85, 0.11), position=(0.65, 1.35, 0.35), rotation=(22, 8, 4))
     Entity(parent=sword, model='cube', color=color.gold, scale=(0.38, 0.07, 0.18), position=(0, 0.58, 0))
     Entity(parent=sword, model='sphere', color=color.rgb(0.3, 0.7, 1), scale=0.09, position=(0, -0.85, 0))
     player.sword = sword
     
-    shield = Entity(
-        parent=player,
-        model='cube',
-        color=color.rgb(0.55, 0.22, 0.18),
-        scale=(0.12, 1.15, 0.85),
-        position=(-0.58, 1.25, -0.05),
-        rotation=(0, -28, 0)
-    )
+    shield = Entity(parent=player, model='cube', color=color.rgb(0.55, 0.22, 0.18), scale=(0.12, 1.15, 0.85), position=(-0.58, 1.25, -0.05), rotation=(0, -28, 0))
     Entity(parent=shield, model='sphere', color=color.gold, scale=0.22, position=(0, 0, 0.12))
     Entity(parent=shield, model='cube', color=color.gold, scale=(0.14, 0.08, 0.9), position=(0, 0.45, 0.13))
     player.shield = shield
@@ -87,8 +73,6 @@ def create_detailed_player():
 
 player = create_detailed_player()
 player.position = (0, 0.5, 0)
-
-# ... rest of the game code remains the same ...
 
 camera_pivot = Entity(parent=player, y=1.85)
 camera.parent = camera_pivot
@@ -228,13 +212,27 @@ def input(key):
         equipment_panel.enabled = False
         dialogue_box.enabled = False
 
-# UPDATE
+# UPDATE (with FPS counter for debugging lag)
+fps_text = Text("FPS: --", position=(-0.78, -0.45), scale=1.2, color=color.yellow, background=True)
+frame_count = 0
+last_time = 0
+
 def update():
-    global yaw, pitch, camera_distance, target_yaw, target_pitch, target_distance, camera_sensitivity, velocity, vy, on_ground
+    global yaw, pitch, camera_distance, target_yaw, target_pitch, target_distance, camera_sensitivity, velocity, vy, on_ground, frame_count, last_time
+    
+    # Simple FPS counter for debugging
+    frame_count += 1
+    current_time = time.time()
+    if current_time - last_time >= 1.0:
+        fps_text.text = f"FPS: {frame_count}"
+        frame_count = 0
+        last_time = current_time
+    
     if held_keys['right mouse']:
         target_yaw += mouse.velocity[0] * camera_sensitivity * time.dt
         target_pitch -= mouse.velocity[1] * camera_sensitivity * time.dt
         target_pitch = max(-62, min(72, target_pitch))
+    
     yaw = lerp(yaw, target_yaw, time.dt * SMOOTH_SPEED)
     pitch = lerp(pitch, target_pitch, time.dt * SMOOTH_SPEED)
     camera_pivot.rotation_x = pitch
@@ -242,14 +240,17 @@ def update():
     camera_distance = lerp(camera_distance, target_distance, time.dt * 9.8)
     camera.local_position = (0, 0, -camera_distance)
     mouse.visible = not held_keys['right mouse']
+    
     if options_panel.enabled:
         camera_sensitivity = sens_slider.value
+    
     move_dir = Vec3(0)
     if held_keys['w']: move_dir += camera.forward
     if held_keys['s']: move_dir -= camera.forward
     if held_keys['a']: move_dir -= camera.right
     if held_keys['d']: move_dir += camera.right
     move_dir.y = 0
+    
     if move_dir.length() > 0.01:
         move_dir = move_dir.normalized()
         velocity += move_dir * 28 * time.dt
@@ -258,6 +259,7 @@ def update():
     else:
         velocity *= (1 - 9 * time.dt)
         if velocity.length() < 0.6: velocity = Vec3(0, 0, 0)
+    
     player.position += velocity * time.dt
     vy -= 28 * time.dt
     player.y += vy * time.dt
@@ -265,11 +267,13 @@ def update():
         player.y = 0.5
         vy = 0
         on_ground = True
+    
     mana_text.text = f"Mana: {player_stats.mana}/100"
 
 print("=" * 60)
-print("ELY NDRIA CHRONICLES - v2.2 FINAL (Now using your player.obj asset!)")
-print("Real 3D player model loaded from assets/player.obj")
+print("ELY NDRIA CHRONICLES - v2.2 FINAL")
+print("Player model scaled to 0.25 (4x smaller)")
+print("FPS counter added for debugging lag")
 print("Press Esc for Options menu")
 print("Enjoy your quest, Aether Knight!")
 print("=" * 60)
