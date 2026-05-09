@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Elyndria Chronicles - v2.4 (FORCED small scale + performance fix)
+Elyndria Chronicles - v2.5 (Even smaller scale + model optimization)
 """
 
 # Disable icon loading
@@ -50,15 +50,19 @@ player_stats = type('PlayerStats', (), {'mana': 95})()
 current_dialogue = []
 dialogue_index = 0
 
-# PLAYER - FORCED SMALL SCALE
+# PLAYER - VERY SMALL SCALE
 def create_detailed_player():
-    print("=== LOADING PLAYER MODEL WITH SCALE 0.1 ===")  # Debug print
+    print("=== LOADING PLAYER MODEL WITH SCALE 0.03 ===")
     player = Entity(
         model='assets/player.obj',
         collider='box',
-        scale=0.1,                    # FORCED VERY SMALL
+        scale=0.03,                    # Even smaller to fix huge model
         y=0.5
     )
+    
+    # Extra safety scaling
+    if hasattr(player, 'model') and player.model:
+        player.model.setScale(0.03)
     
     sword = Entity(parent=player, model='cube', color=color.rgb(0.72, 0.74, 0.80), scale=(0.07, 1.85, 0.11), position=(0.65, 1.35, 0.35), rotation=(22, 8, 4))
     Entity(parent=sword, model='cube', color=color.gold, scale=(0.38, 0.07, 0.18), position=(0, 0.58, 0))
@@ -214,19 +218,8 @@ def input(key):
         dialogue_box.enabled = False
 
 # UPDATE
-fps_text = Text("FPS: --", position=(-0.78, -0.45), scale=1.2, color=color.yellow, background=True)
-frame_count = 0
-last_time = 0
-
 def update():
-    global yaw, pitch, camera_distance, target_yaw, target_pitch, target_distance, camera_sensitivity, velocity, vy, on_ground, frame_count, last_time
-    
-    frame_count += 1
-    current_time = time.time()
-    if current_time - last_time >= 1.0:
-        fps_text.text = f"FPS: {frame_count}"
-        frame_count = 0
-        last_time = current_time
+    global yaw, pitch, camera_distance, target_yaw, target_pitch, target_distance, camera_sensitivity, velocity, vy, on_ground
     
     if held_keys['right mouse']:
         target_yaw += mouse.velocity[0] * camera_sensitivity * time.dt
@@ -271,9 +264,9 @@ def update():
     mana_text.text = f"Mana: {player_stats.mana}/100"
 
 print("=" * 60)
-print("ELY NDRIA CHRONICLES - v2.4 FINAL")
-print("FORCED scale=0.1 + development_mode=False + target_fps=60")
-print("If you still see big model, your git pull did not work!")
+print("ELY NDRIA CHRONICLES - v2.5 FINAL")
+print("scale=0.03 + extra setScale safety")
+print("If still huge, your player.obj is exported at massive scale")
 print("Press Esc for Options menu")
 print("Enjoy your quest, Aether Knight!")
 print("=" * 60)
