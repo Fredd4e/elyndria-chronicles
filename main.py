@@ -275,12 +275,19 @@ def update():
         return
     
     try:
+        # === ORBIT CAMERA (right mouse) ===
         if held_keys['right mouse']:
+            if not mouse.locked:
+                mouse.locked = True
             yaw += mouse.velocity[0] * mouse_sensitivity * 140 * time.dt
             pitch -= mouse.velocity[1] * mouse_sensitivity * 140 * time.dt
             pitch = max(-80, min(80, pitch))
             camera_pivot.rotation = (pitch, yaw, 0)
+        else:
+            if mouse.locked:
+                mouse.locked = False
         
+        # === CAMERA-RELATIVE MOVEMENT ===
         move_dir = Vec3(0, 0, 0)
         cam_forward = camera.forward
         cam_forward.y = 0
