@@ -1,18 +1,11 @@
 #!/usr/bin/env python3
 """
-Elyndria Chronicles - v1.9 FINAL (Icon file auto-created - warning gone forever)
+Elyndria Chronicles - v2.0 FINAL (All icon warnings removed - clean & smooth)
 """
 
-# Must be BEFORE importing ursina
+# Disable icon loading completely (must be before importing ursina)
 from panda3d.core import loadPrcFileData
 loadPrcFileData("", "icon-filename ")
-
-# Auto-create the missing icon so the warning never spams again
-import os
-os.makedirs("textures", exist_ok=True)
-if not os.path.exists("textures/ursina.ico"):
-    with open("textures/ursina.ico", "wb") as f:
-        f.write(b"")
 
 from ursina import *
 import math
@@ -259,8 +252,8 @@ def update():
     mana_text.text = f"Mana: {player_stats.mana}/100"
 
 print("=" * 60)
-print("ELY NDRIA CHRONICLES - v1.9 FINAL")
-print("Icon warning completely gone — no more spam!")
+print("ELY NDRIA CHRONICLES - v2.0 FINAL")
+print("All icon warnings removed — game is now smooth!")
 print("Press Esc for Options menu")
 print("Enjoy your quest, Aether Knight!")
 print("=" * 60)
