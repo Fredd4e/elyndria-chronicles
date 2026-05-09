@@ -17,6 +17,18 @@ Inspired by World of Warcraft's iconic camera and movement system, this game fea
 - **Vast Beautiful World**: Expansive 200x200 meadow with dense forests of detailed trees, sparkling lakes, ancient ruins, glowing flora, dynamic lighting, fog, and a majestic sky. Every detail crafted for immersion.
 - **Beautiful Graphics**: Custom lighting (sun + ambient), atmospheric fog, smooth animations, particle-like effects for spells, and carefully chosen color palettes for a magical fantasy feel.
 
+## 🚀 Easy Launcher (Recommended for Updates)
+
+After the **first clone**, you never have to open a terminal again!
+
+1. Double-click **`launcher.bat`** (included in the repo)
+2. It will automatically:
+   - `git pull` the latest version
+   - Install/update `requirements.txt`
+   - Launch the game
+
+Perfect for staying up to date with new features, bug fixes, or content additions.
+
 ## 📜 The Lore of Elyndria
 
 Long ago, the twin goddesses **Aethera** (light) and **Nyxara** (shadow) wove the world of **Elyndria** from pure cosmic threads. For millennia, harmony reigned. Then the **Void Emperor** — an ancient horror from beyond the stars — shattered the **Great Veil**, flooding the land with corrupting darkness.
@@ -44,19 +56,23 @@ Together, you will face horrors, uncover ancient truths, and perhaps... find mor
 | **C**                | Open / Close Character Panel    |
 | **Esc**              | Quit game                       |
 
-## 🚀 How to Run
+## 🛠️ How to Run (First Time)
 
-1. Install Python 3.8+
-2. `pip install ursina`
-3. `python main.py`
+1. Clone the repo: `git clone https://github.com/Fredd4e/elyndria-chronicles.git`
+2. `cd elyndria-chronicles`
+3. Double-click `launcher.bat` (it handles everything)
 
-The game will launch in a window. Take your time to explore the world, talk to the beautiful NPCs, admire the craftsmanship of the characters, and feel the epic atmosphere.
+Or manually:
+```bash
+pip install -r requirements.txt
+python main.py
+```
 
 ## 🛠️ Technical Notes
 
 - Built with **Ursina (Panda3D backend)** for pure Python 3D.
 - All models are **procedurally detailed** using layered primitives (cylinders, spheres, planes, cones) — no external assets required.
-- Fully self-contained single-file game (main.py).
+- Fully self-contained single-file game (main.py + launcher.bat).
 - Smooth 60+ FPS on modest hardware.
 - Extensible: Easy to add quests, enemies, more spells, inventory, etc.
 
