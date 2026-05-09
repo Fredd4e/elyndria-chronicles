@@ -276,14 +276,6 @@ def update():
             pitch = max(-82, min(82, pitch))
             camera_pivot.rotation = (pitch, yaw, 0)
         
-        # === FIXED MOUSE WHEEL (using mouse.wheel) ===
-        if mouse.wheel > 0:          # Scroll up = zoom in
-            camera_distance = max(min_distance, camera_distance - 2.5)
-            camera.position = (0, 0, -camera_distance)
-        elif mouse.wheel < 0:        # Scroll down = zoom out
-            camera_distance = min(max_distance, camera_distance + 2.5)
-            camera.position = (0, 0, -camera_distance)
-        
         # === MOVEMENT ===
         move_dir = Vec3(0, 0, 0)
         cam_forward = camera.forward
@@ -420,6 +412,15 @@ def input(key):
         if dialogue_panel: advance_dialogue()
         else: check_interact()
     if key == 'escape': application.quit()
+
+    # Mouse wheel zoom (modern Ursina way - works in current versions)
+    global camera_distance
+    if key == 'scroll up':
+        camera_distance = max(min_distance, camera_distance - 2.5)
+        camera.position = (0, 0, -camera_distance)
+    if key == 'scroll down':
+        camera_distance = min(max_distance, camera_distance + 2.5)
+        camera.position = (0, 0, -camera_distance)
 
 
 # ============== MAIN ==============
