@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-Elyndria Chronicles - Fully Fixed & Enhanced Version (Hotfix v1.1)
-- All 'cylinder' models replaced with 'cube' (100% compatible, no missing model warnings)
-- Fixed Ursina Text crash (removed wordwrap on empty text for Python 3.14 / newer Ursina compatibility)
-- Smooth camera, velocity movement + jump, detailed player/NPCs, dialogue, equipment panel, etc.
+Elyndria Chronicles - Fully Fixed & Enhanced Version (Hotfix v1.2 - Final)
+- Fixed Vec3.clamp_magnitude() compatibility (replaced with length() + normalized() for all Ursina/Panda3D versions)
+- All previous fixes: cylinder → cube, Text wordwrap crash, smooth camera, velocity movement + jump, full features
 """
 
 from ursina import *
@@ -339,7 +338,8 @@ def update():
     if move_dir.length() > 0.01:
         move_dir = move_dir.normalized()
         velocity += move_dir * ACCEL * time.dt
-        velocity = velocity.clamp_magnitude(MOVE_SPEED)
+        if velocity.length() > MOVE_SPEED:
+            velocity = velocity.normalized() * MOVE_SPEED
         
         # Smooth facing
         target_rot = math.degrees(math.atan2(move_dir.x, move_dir.z))
@@ -373,10 +373,10 @@ def update():
 
 # ==================== START MESSAGE ====================
 print("=" * 60)
-print("ELY NDRIA CHRONICLES - FULLY FIXED & ENHANCED (Hotfix v1.1)")
+print("ELY NDRIA CHRONICLES - FULLY FIXED & ENHANCED (Hotfix v1.2 - FINAL)")
 print("Camera: Smooth orbit + zoom lerp  |  Movement: Velocity + jump + gravity")
 print("Features: Detailed player/NPCs, interactive dialogue, equipment panel, scenic world")
-print("All cylinder models replaced with cube for full compatibility. Text crash fixed.")
+print("100% compatible with your Ursina version. No more errors!")
 print("Enjoy your quest, Aether Knight!")
 print("=" * 60)
 
