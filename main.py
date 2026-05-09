@@ -1,14 +1,9 @@
 #!/usr/bin/env python3
 """
-Elyndria Chronicles - Fully Fixed & Enhanced Version
-- Smooth camera orbit/zoom with lerp (fixes jittery/sticky camera)
-- Velocity-based player movement with acceleration, friction, jump & gravity (fixes unresponsive/stuck movement)
-- Detailed armored player (Kael Voss) with sword, shield, armor plates, helmet, cape
-- Two interactive voluptuous female NPCs (Elara & Lirael) with unique models, proximity dialogue (E key)
-- Equipment panel (C key) with stats & gear display
-- Expanded scenic world: lake, ruins, varied trees, dynamic lighting
-- Mana display, improved combat feedback, full controls
-- All safe Ursina primitives, no deprecated features, stable & performant
+Elyndria Chronicles - Fully Fixed & Enhanced Version (Hotfix v1.1)
+- All 'cylinder' models replaced with 'cube' (100% compatible, no missing model warnings)
+- Fixed Ursina Text crash (removed wordwrap on empty text for Python 3.14 / newer Ursina compatibility)
+- Smooth camera, velocity movement + jump, detailed player/NPCs, dialogue, equipment panel, etc.
 """
 
 from ursina import *
@@ -123,7 +118,7 @@ lake = Entity(model='plane', color=color.rgb(0.08, 0.28, 0.55), scale=48, positi
 # Ruins (ancient stone structures)
 def make_ruin(x, z, rot=0):
     # Main broken pillar
-    Entity(model='cylinder', color=color.rgb(0.48, 0.44, 0.40), scale=(2.2, 9.5, 2.2), position=(x, 4.8, z), rotation=(0, rot, 0))
+    Entity(model='cube', color=color.rgb(0.48, 0.44, 0.40), scale=(2.2, 9.5, 2.2), position=(x, 4.8, z), rotation=(0, rot, 0))
     # Broken top
     Entity(model='cube', color=color.rgb(0.45, 0.42, 0.38), scale=(2.8, 1.8, 2.8), position=(x+0.8, 9.2, z-0.6), rotation=(12, rot+15, 5))
     # Base debris
@@ -138,7 +133,7 @@ make_ruin(-8, -52, -30)
 # Varied trees (more immersive forest)
 def make_tree(x, z, scale_mod=1.0):
     h = random.uniform(3.8, 6.2) * scale_mod
-    trunk = Entity(model='cylinder', color=color.rgb(0.35, 0.22, 0.12), scale=(0.9, h, 0.9), position=(x, h/2, z))
+    trunk = Entity(model='cube', color=color.rgb(0.35, 0.22, 0.12), scale=(0.9, h, 0.9), position=(x, h/2, z))
     foliage = Entity(model='sphere', color=color.rgb(0.12, 0.42, 0.18), scale=3.2*scale_mod, position=(x, h+1.2, z))
     # Extra foliage layers for density
     Entity(model='sphere', color=color.rgb(0.15, 0.38, 0.16), scale=2.4*scale_mod, position=(x+0.6, h+2.1, z-0.4))
@@ -164,7 +159,7 @@ def create_npc(name, x, z, primary_color, accent_color, is_female=True):
     # === HEAD + HAIR ===
     head = Entity(parent=npc, model='sphere', color=color.rgb(0.96, 0.84, 0.76), scale=0.40, position=(0, 1.95, 0))
     # Long flowing hair (back)
-    Entity(parent=npc, model='cylinder', color=accent_color, scale=(0.55, 1.6, 0.55), position=(0, 1.85, -0.35), rotation=(12, 0, 0))
+    Entity(parent=npc, model='cube', color=accent_color, scale=(0.55, 1.6, 0.55), position=(0, 1.85, -0.35), rotation=(12, 0, 0))
     # Hair strands / bangs
     Entity(parent=npc, model='sphere', color=accent_color, scale=0.52, position=(0, 2.15, 0.05))
     Entity(parent=npc, model='sphere', color=accent_color.tint(-0.1), scale=0.38, position=(-0.25, 2.05, 0.22))
@@ -182,7 +177,7 @@ def create_npc(name, x, z, primary_color, accent_color, is_female=True):
     # === ACCESSORIES ===
     if "Elara" in name:
         # Sorceress staff
-        staff = Entity(parent=npc, model='cylinder', color=color.rgb(0.4, 0.35, 0.25), scale=(0.06, 2.2, 0.06), 
+        staff = Entity(parent=npc, model='cube', color=color.rgb(0.4, 0.35, 0.25), scale=(0.06, 2.2, 0.06), 
                        position=(0.55, 1.35, 0.25), rotation=(25, 35, 0))
         Entity(parent=staff, model='sphere', color=color.rgb(0.4, 0.9, 0.6), scale=0.18, position=(0, -1.0, 0))  # crystal
         npc.staff = staff
@@ -227,7 +222,7 @@ health_text = Text("Health: 100/100", position=(-0.78, 0.34), scale=1.15, color=
 dialogue_box = Entity(parent=camera.ui, model='quad', scale=(0.52, 0.28), color=color.rgba(0.08, 0.04, 0.12, 0.92), 
                       position=(0, -0.32), enabled=False)
 dialogue_name = Text(parent=dialogue_box, text="", scale=1.6, color=color.gold, position=(0, 0.22), origin=(0, 0))
-dialogue_text = Text(parent=dialogue_box, text="", scale=1.1, color=color.white, position=(0, -0.02), origin=(0, 0), wordwrap=38)
+dialogue_text = Text(parent=dialogue_box, text="", scale=1.1, color=color.white, position=(0, -0.02), origin=(0, 0))
 
 # Equipment panel
 equipment_panel = Entity(parent=camera.ui, model='quad', scale=(0.36, 0.58), color=color.rgba(0.06, 0.03, 0.10, 0.96), 
@@ -378,10 +373,11 @@ def update():
 
 # ==================== START MESSAGE ====================
 print("=" * 60)
-print("ELY NDRIA CHRONICLES - FULLY FIXED & ENHANCED")
+print("ELY NDRIA CHRONICLES - FULLY FIXED & ENHANCED (Hotfix v1.1)")
 print("Camera: Smooth orbit + zoom lerp  |  Movement: Velocity + jump + gravity")
 print("Features: Detailed player/NPCs, interactive dialogue, equipment panel, scenic world")
-print("All issues resolved. Enjoy your quest, Aether Knight!")
+print("All cylinder models replaced with cube for full compatibility. Text crash fixed.")
+print("Enjoy your quest, Aether Knight!")
 print("=" * 60)
 
 app.run()
